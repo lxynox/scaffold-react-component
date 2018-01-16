@@ -1,0 +1,65 @@
+---
+categories:
+  Runway:
+    components:
+      - Button
+      - Icon
+      - Typography
+  Misc:
+    components:
+      - Alert
+      - Spinner
+      - Modal
+      - Glyph
+      - Avatar
+      - ProgressBar
+      - Stepper
+  Forms:
+    isFolder: true
+    components:
+      - FormError
+      - FormLabel
+      - TextInput
+      - TextArea
+      - Select
+      - OptionLabel
+      - Radio
+      - Checkbox
+  Cards:
+    isFolder: true
+    components:
+      - CardHeading
+      - CardBody
+      - CardFooter
+  Layout:
+    isFolder: true
+    components:
+      - Container
+      - Sidebar
+      - Footer
+
+components:
+  Button: {}
+  Icon: {}
+  Typography: {}
+  Alert: {}
+  Spinner: {}
+  Modal: {}
+  Glyph: {}
+  Avatar: {}
+  ProgressBar: {}
+  Stepper: {}
+  FormError: {}
+  FormLabel: {}
+  TextInput: {}
+  TextArea: {}
+  Select: {}
+  OptionLabel: {}
+  Radio: {}
+  Checkbox: {}
+  CardHeading: {}
+  CardBody: {}
+  CardFooter: {}
+  Container: {}
+  Sidebar: {}
+  Footer: {}

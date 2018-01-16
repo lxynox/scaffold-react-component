@@ -1,0 +1,148 @@
+#!/usr/bin/env node
+
+const { 
+  readFile, 
+  outputFile, 
+  move
+} = require('fs-extra')
+const path = require('path')
+const yaml = require('yamljs')
+const ejs = require('ejs')
+const cFonts = require('cfonts')
+const Conflicter = require('../conflicter')
+const {
+  log,
+  success,
+  error,
+  info,
+  debug
+} = require('../logger')
+
+
+const DEFAULT_SETTINGS = {
+  templateRoot: '../templates',
+  destRoot: './v2/components',
+  component: {
+    isClassComponent: false,
+    useRedux: false,
+    useReadme: false
+  }
+}
+
+let runner
+
+class CLC {
+  constructor(resolver, srcRoot, dstRoot) {
+    this.resolver = resolver
+    this.templateRoot = path.resolve(srcRoot || __dirname, DEFAULT_SETTINGS.templateRoot)
+    this.destinationRoot = dstRoot || process.cwd()
+    this.settings = yaml.load(path.resolve(__dirname, '../settings.yml'))
+  }
+
+  sayLogo() {
+    setTimeout(() => cFonts.say('CLC', {colors: ['candy']}), 1000)
+  }
+
+  getTemplatePath(filepath) {
+    return path.resolve(this.templateRoot, filepath)
+  }
+
+  getDestinationPath(filepath) {
+    return path.resolve(this.destinationRoot, filepath)
+  }
+
+  async createFile({from, to}, templateData) {
+    const templateString = await readFile(this.getTemplatePath(from), 'utf8') 
+    const contents = ejs.compile(templateString)(templateData)
+    const filepath = this.getDestinationPath(to)
+    return {filepath, contents}
+  }
+
+  async handleCheck({filepath, contents}, action) {
+    // skip: `identical`/`skip`
+    if (action === 'identical') {
+      info(`${filepath} identical.`)
+      return
+    }
+    if (action === 'skip') {
+      info(`${filepath} skipped.`)
+      return
+    }
+
+    // write: `create`/`backup`/`overwrite`
+    try {
+      if (action === 'backup') {
+        try { 
+          await move(filepath, filepath + '.backup')
+        } catch(e) {
+          error(`${filepath} failed to backup`)
+        }
+      }
+
+      await outputFile(filepath, contents)
+      success(`${filepath} succeed to ${action}`)
+    } catch (err) {
+      error(`${filepath} failed to ${action}.\n${err}`)
+    }
+  }
+
+  async run() {
+    const {
+      components,
+      categories
+    } = this.settings
+
+    const importPaths = {}
+    const categoryKeys = Object.keys(categories)
+    // Categories `Layout, Form etc`
+    for (const category of categoryKeys) {
+      const {
+        isFolder,
+        components: componentKeys
+      } = categories[category]
+
+      // Components under each category `Layout/Container, Layout/Footer etc`
+      for (const component of componentKeys) {
+        const tempPaths = [component, component]
+        const {
+          isClassComponent = DEFAULT_SETTINGS.component.isClassComponent
+        } = components[component]
+
+        // templates to compile
+        const templates = [
+          './index.spec.js',
+          './README.md',
+          './index.css',
+          isClassComponent ? './ClassComponent.js' : './FunctionalComponent.js',
+        ]
+
+        let pathPrefix = DEFAULT_SETTINGS.destRoot
+        if (isFolder) {
+          pathPrefix = path.resolve(pathPrefix, category)
+          tempPaths.unshift(category)
+        }
+        importPaths[component] = tempPaths.join('/')
+
+        // files to write to disk
+        const files = await Promise.all([
+          this.createFile({from: templates[0], to: `${DEFAULT_SETTINGS.destRoot}/__tests__/${component}.spec.js`}, {componentName: component, importPath: importPaths[component]}),
+          this.createFile({from: templates[1], to: `${pathPrefix}/${component}/README.md`}, {componentName: component}),
+          this.createFile({from: templates[2], to: `${pathPrefix}/${component}/${component}.css`}, {componentName: component}),
+          this.createFile({from: templates[3], to: `${pathPrefix}/${component}/${component}.jsx`}, {componentName: component})
+        ])
+        for (const file of files) await this.resolver.check(file, this.handleCheck)
+      }
+    }
+
+    // Shared exports
+    const indexJs =  await this.createFile({from: 'index.js', to: `${DEFAULT_SETTINGS.destRoot}/index.js`}, {components: importPaths})
+    await this.resolver.check(indexJs, this.handleCheck)   
+
+    this.sayLogo()
+  }
+}
+
+runner = new CLC(Conflicter())
+
+runner.run()
+
