@@ -114,6 +114,7 @@ class CLC {
           './README.md',
           './index.css',
           isClassComponent ? './ClassComponent.js' : './FunctionalComponent.js',
+          './index.js'
         ]
 
         let pathPrefix = DEFAULT_SETTINGS.destRoot
@@ -125,18 +126,15 @@ class CLC {
 
         // files to write to disk
         const files = await Promise.all([
-          this.createFile({from: templates[0], to: `${DEFAULT_SETTINGS.destRoot}/__tests__/${component}.spec.js`}, {componentName: component, importPath: importPaths[component]}),
+          this.createFile({from: templates[0], to: `${pathPrefix}/${component}/__tests__/${component}.spec.js`}, {componentName: component}),
           this.createFile({from: templates[1], to: `${pathPrefix}/${component}/README.md`}, {componentName: component}),
-          this.createFile({from: templates[2], to: `${pathPrefix}/${component}/${component}.css`}, {componentName: component}),
-          this.createFile({from: templates[3], to: `${pathPrefix}/${component}/${component}.jsx`}, {componentName: component})
+          this.createFile({from: templates[2], to: `${pathPrefix}/${component}/${component[0].toLowerCase() + component.slice(1)}.css`}, {componentName: component}),
+          this.createFile({from: templates[3], to: `${pathPrefix}/${component}/${component}.jsx`}, {componentName: component}),
+          this.createFile({from: templates[4], to: `${pathPrefix}/${component}/index.js`}, {componentName: component})
         ])
         for (const file of files) await this.resolver.check(file, this.handleCheck)
       }
     }
-
-    // Shared exports
-    const indexJs =  await this.createFile({from: 'index.js', to: `${DEFAULT_SETTINGS.destRoot}/index.js`}, {components: importPaths})
-    await this.resolver.check(indexJs, this.handleCheck)   
 
     this.sayLogo()
   }

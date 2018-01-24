@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import <%=componentName%> from '../<%=importPath%>';
+import <%=componentName%> from '..';
 
 describe('<%=componentName%>', () => {
   const props = {
