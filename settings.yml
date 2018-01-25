@@ -3,7 +3,7 @@ categories:
   Runway:
     components:
       - Button
-      - Icon
+      - Svg
       - Typography
   Misc:
     components:
@@ -31,6 +31,8 @@ categories:
       - CardHeading
       - CardBody
       - CardFooter
+      - Notification
+      - DetailsCard
   Layout:
     isFolder: true
     components:
@@ -40,7 +42,7 @@ categories:
 
 components:
   Button: {}
-  Icon: {}
+  Svg: {}
   Typography: {}
   Alert: {}
   Spinner: {}
@@ -63,4 +65,5 @@ components:
   Container: {}
   Sidebar: {}
   Footer: {}
-
+  Notification: {}
+  DetailsCard: {}

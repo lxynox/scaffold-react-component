@@ -21,7 +21,7 @@ const {
 
 const DEFAULT_SETTINGS = {
   templateRoot: '../templates',
-  destRoot: './v2/components',
+  destRoot: './v2',
   component: {
     isClassComponent: false,
     useRedux: false,
@@ -87,50 +87,28 @@ class CLC {
   }
 
   async run() {
-    const {
-      components,
-      categories
-    } = this.settings
-
-    const importPaths = {}
+    const {components, categories} = this.settings
     const categoryKeys = Object.keys(categories)
+
     // Categories `Layout, Form etc`
     for (const category of categoryKeys) {
-      const {
-        isFolder,
-        components: componentKeys
-      } = categories[category]
+      const {isFolder, components: componentKeys } = categories[category]
 
       // Components under each category `Layout/Container, Layout/Footer etc`
       for (const component of componentKeys) {
-        const tempPaths = [component, component]
-        const {
-          isClassComponent = DEFAULT_SETTINGS.component.isClassComponent
-        } = components[component]
-
-        // templates to compile
-        const templates = [
-          './index.spec.js',
-          './README.md',
-          './index.css',
-          isClassComponent ? './ClassComponent.js' : './FunctionalComponent.js',
-          './index.js'
-        ]
+        const templateContext = {componentName: component}
 
         let pathPrefix = DEFAULT_SETTINGS.destRoot
-        if (isFolder) {
-          pathPrefix = path.resolve(pathPrefix, category)
-          tempPaths.unshift(category)
-        }
-        importPaths[component] = tempPaths.join('/')
+        if (isFolder) pathPrefix += `/${category}`
+        pathPrefix += `/${component}`
 
         // files to write to disk
         const files = await Promise.all([
-          this.createFile({from: templates[0], to: `${pathPrefix}/${component}/__tests__/${component}.spec.js`}, {componentName: component}),
-          this.createFile({from: templates[1], to: `${pathPrefix}/${component}/README.md`}, {componentName: component}),
-          this.createFile({from: templates[2], to: `${pathPrefix}/${component}/${component[0].toLowerCase() + component.slice(1)}.css`}, {componentName: component}),
-          this.createFile({from: templates[3], to: `${pathPrefix}/${component}/${component}.jsx`}, {componentName: component}),
-          this.createFile({from: templates[4], to: `${pathPrefix}/${component}/index.js`}, {componentName: component})
+          this.createFile({from: 'index.spec.js', to: `${pathPrefix}/__tests__/${component}.spec.js`}, templateContext),
+          this.createFile({from: 'README.md', to: `${pathPrefix}/README.md`}, templateContext),
+          this.createFile({from: 'index.css', to: `${pathPrefix}/${component[0].toLowerCase() + component.slice(1)}.css`}, templateContext),
+          this.createFile({from: 'FunctionalComponent.js', to: `${pathPrefix}/${component}.jsx`}, templateContext),
+          this.createFile({from: 'index.js', to: `${pathPrefix}/index.js`}, templateContext)
         ])
         for (const file of files) await this.resolver.check(file, this.handleCheck)
       }
