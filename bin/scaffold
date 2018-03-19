@@ -1,22 +1,12 @@
 #!/usr/bin/env node
 
-const { 
-  readFile, 
-  outputFile, 
-  move
-} = require('fs-extra')
+const { readFile, outputFile, move } = require('fs-extra')
 const path = require('path')
 const yaml = require('yamljs')
 const ejs = require('ejs')
 const cFonts = require('cfonts')
 const Conflicter = require('../conflicter')
-const {
-  log,
-  success,
-  error,
-  info,
-  debug
-} = require('../logger')
+const { log, success, error, info, debug } = require('../logger')
 
 
 const DEFAULT_SETTINGS = {
@@ -90,27 +80,45 @@ class CLC {
     const {components, categories} = this.settings
     const categoryKeys = Object.keys(categories)
 
-    // Categories `Layout, Form etc`
+    // Categories (e.g., /Layout)
     for (const category of categoryKeys) {
-      const {isFolder, components: componentKeys } = categories[category]
+      const {isFolder, components: componentKeys} = categories[category]
 
-      // Components under each category `Layout/Container, Layout/Footer etc`
+      // Components (e.g., /Layout/Container)
       for (const component of componentKeys) {
         const templateContext = {componentName: component}
-
-        let pathPrefix = DEFAULT_SETTINGS.destRoot
-        if (isFolder) pathPrefix += `/${category}`
-        pathPrefix += `/${component}`
+        const pathPrefix = path.resolve(
+          DEFAULT_SETTINGS.destRoot,
+          isFolder ? category : '',
+          component
+        )
 
         // files to write to disk
-        const files = await Promise.all([
-          this.createFile({from: 'index.spec.js', to: `${pathPrefix}/__tests__/${component}.spec.js`}, templateContext),
-          this.createFile({from: 'README.md', to: `${pathPrefix}/README.md`}, templateContext),
-          this.createFile({from: 'index.css', to: `${pathPrefix}/${component[0].toLowerCase() + component.slice(1)}.css`}, templateContext),
-          this.createFile({from: 'FunctionalComponent.js', to: `${pathPrefix}/${component}.jsx`}, templateContext),
-          this.createFile({from: 'index.js', to: `${pathPrefix}/index.js`}, templateContext)
-        ])
-        for (const file of files) await this.resolver.check(file, this.handleCheck)
+        try {
+          const files = await Promise.all([
+            this.createFile({
+              from: 'index.spec.js', 
+              to: path.resolve(pathPrefix, '__tests__', `${component}.spec.js`)
+            }, templateContext),
+            this.createFile({
+              from: 'README.md',
+              to: path.resolve(pathPrefix, 'README.md')
+            }, templateContext),
+            this.createFile({
+              from: 'index.css',
+              to: path.resolve(pathPrefix, `${component[0].toLowerCase() + component.slice(1)}.css`)
+            }, templateContext),
+            this.createFile({
+              from: 'FunctionalComponent.js',
+              to: path.resolve(pathPrefix, `${component}.jsx`)
+            }, templateContext),
+            this.createFile({
+              from: 'index.js',
+              to: path.resolve(pathPrefix, 'index.js')
+            }, templateContext)
+          ])
+          for (const file of files) await this.resolver.check(file, this.handleCheck)
+        } catch (e) { error(e) }
       }
     }
 
