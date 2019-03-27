@@ -1,54 +1,41 @@
-# scaffold-CLC
+# scaffold-react-component
 
-### how to install
+### install
 
 ```bash
-$ git clone https://github.com/lxyad/scaffold-CLC.git
-$ cd scaffold-CLC
+$ git clone https://github.com/lxynox/scaffold-react-component.git
+$ cd scaffold-react-component
 $ npm install
-$ npm link # Make `scaffold` a global available command
+$ npm link
 ```
 
 ### how to use
 
 1. Update the [templates](./templates) based on a bare minimal setup for each component.
-2. Update the [settings.yml](./settings.yml) based on the folder structure we'll use for the component library.
+2. Update the [settings.yml](./settings.yml) based on folder structure preference.
 
 An example would look like:
 
 ```
-v2
-├── Button
-│   ├── Button.css
-│   ├── Button.js
-│   ├── Button.md
+├── Alert
+│   ├── Alert.jsx
+│   ├── README.md
 │   ├── __tests__
-│   │   └── Button.specjs
+│   ├── alert.css
 │   └── index.js
-└── Form
-    ├── Select.css
-    ├── Select.js
-    ├── Select.md
-    ├── TextArea.css
-    ├── TextArea.js
-    ├── TextArea.md
-    ├── TextInput.css
-    ├── TextInput.js
-    ├── TextInput.md
-    ├── __tests__
-    │   ├── Select.specjs
-    │   ├── TextArea.specjs
-    │   └── TextInput.specjs
-    └── index.js
-```
+├── Avatar
+│   ├── Avatar.jsx
+│   ├── README.md
+│   ├── __tests__
+│   ├── avatar.css
+│   └── index.js
+├── Button
+│   ├── Button.jsx
+│   ├── README.md
+│   ├── __tests__
+│   ├── button.css
+│   └── index.js```
 
-### how to test
-
-Change to the directory you want to output files, say somewhere under employer-web-client, then
-
-```
-$ scaffold
-```
 
 
 
