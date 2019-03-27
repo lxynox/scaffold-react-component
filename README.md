@@ -34,7 +34,8 @@ An example would look like:
 │   ├── README.md
 │   ├── __tests__
 │   ├── button.css
-│   └── index.js```
+│   └── index.js
+```
 
 
 
